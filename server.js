@@ -9,6 +9,7 @@ const categoryRoute = require('./routes/categoryRoutes');
 const subCategoryRoute = require('./routes/subCategoryRoute');
 
 const ApiError= require('./utils/ApiError');
+const brandRoute = require('./routes/brandRoute');
 
 const GlobalErrHandle= require('./middlewares/ErrorMiddleware')
 // Connect with db
@@ -28,7 +29,8 @@ if (process.env.NODE_ENV === 'development') {
 // Mount Routes
 app.use('/api/v1/categories', categoryRoute);
 app.use('/api/v1/subcategories', subCategoryRoute);
-
+app.use('/api/v1/brands', brandRoute);
+ 
 app.all('*',(req,res,next)=>{
   // const err = new Error (` con't found route ${req.originalUrl}`)
   // next(err.message);
