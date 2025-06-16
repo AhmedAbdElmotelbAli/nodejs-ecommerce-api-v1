@@ -18,7 +18,16 @@ exports.createSubCategoryValidator = [
     .notEmpty()
     .withMessage('subCategory must be belong to category')
     .isMongoId()
-    .withMessage('Invalid Category id format'),
+    .withMessage('Invalid Category id format')
+    .custom((categoryId) =>
+      Category.findById(categoryId).then((category) => {
+        if (!category) {
+          return Promise.reject(
+            new Error(`No category for this id: ${categoryId}`)
+          );
+        }
+      })
+    ),
   validatorMiddleware,
 ];
 
