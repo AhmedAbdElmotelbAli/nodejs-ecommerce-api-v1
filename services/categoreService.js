@@ -1,52 +1,33 @@
-const multer  = require('multer');
 const sharp = require('sharp');
-const factory = require('./handlersFactory');
 const { v4: uuidv4 } = require('uuid');
-const Category = require('../models/Categoremodel');
-
-const ApiError = require('../utils/ApiError');
-const multerStorage = multer.memoryStorage();
 const asyncHandler = require('express-async-handler');
 
+const factory = require('./handlersFactory');
+const { uploadSingleImage } = require('../middlewares/uploadImageMiddleware');
+const Category = require('../models/Categoremodel');
 
 // Upload single image
-const multerFilter =function (req, file, cb) {
+exports.uploadCategoryImage = uploadSingleImage('image');
 
-  if(file.mimetype.startsWith("image"))
-    {
-      cb(null, true);
-    }else{
-      cb(new ApiError("only image allowed",400),false);
-    }
-  
-}
-//diskStorage
-// const multerStorage= multer.diskStorage({
-//   destination: function (req, file, cb) {
-//     //C:\nodejs\nodejs-ecommerce-api-v1\package-lock.json
-//     cb(null, 'C:/nodejs/nodejs-ecommerce-api-v1/uploads/Categories')
-//   },
-//   filename: function (req, file, cb) {
-//     const ext = file.mimetype.split('/')[1];
-//     const filename = `category-${uuidv4()}-${Date.now()}-.${ext}`;
-//     cb(null, filename )
-//   }
-// });
+// Image processing
+exports.resizeImage = asyncHandler(async (req, res, next) => {
+  const filename = `category-${uuidv4()}-${Date.now()}.jpeg`;
 
-const upload = multer({ storage: multerStorage,fileFilter:multerFilter })
-exports.uploadCategoryImage =upload.single('image');
+  await sharp(req.file.buffer)
+    .resize(600, 600)
+    .toFormat('jpeg')
+    .jpeg({ quality: 95 })
+    .toFile(`uploads/categories/${filename}`);
 
-exports.resizeImage = asyncHandler(async(req, res, next) => {
-  const filename = `category-${uuidv4()}-${Date.now()}-.jpeg`;
-await sharp(req.file.buffer).resize(500,500).toFormat("jpeg").jpeg({quality:80}).toFile(`uploads/Categories/${filename}`);
-next();
+  // Save image into our db
+  req.body.image = filename;
+
+  next();
 });
-const uploadCategoryImage = upload.single("image");
+
 // @desc    Get list of categories
 // @route   GET /api/v1/categories
 // @access  Public
-
-// Build query
 exports.getCategories = factory.getAll(Category);
 
 // @desc    Get specific category by id
