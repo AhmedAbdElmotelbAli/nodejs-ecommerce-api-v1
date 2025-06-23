@@ -1,0 +1,1 @@
+- use sharp for image processing
