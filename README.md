@@ -1,0 +1,5 @@
+- USE multer middleware for upload image
+- multer storage config
+- use sharp for image processing
+- make generl middleware for upload image single and mix
+- use moongose middleware post to change image to url and image name in database
